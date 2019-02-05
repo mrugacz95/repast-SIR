@@ -40,12 +40,12 @@ public class ModelBuilder implements ContextBuilder<Object> {
 
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int suspectibleCount = (Integer) params.getValue("susceptible_count");
-		float infectionRate = (Float) params.getValue("infection_rate");
+		
 		for (int i = 0; i < suspectibleCount; i++) {
-			context.add(new Susceptible(space, grid, infectionRate));
+			context.add(new Susceptible(space, grid));
 		}
 
-		int infectiousCount = (Integer) params.getValue("infectious_count");
+		int infectiousCount = (Integer) params.getValue("infected_count");
 		for (int i = 0; i < infectiousCount; i++) {
 			context.add(new Infectious(space, grid));
 		}

@@ -14,34 +14,25 @@ import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
 
-public class Infectious {
-	ContinuousSpace<Object> space;
-	Grid<Object> grid;
+public class Infectious extends Actor {
+
 	float recoveryRate;
-	
+	float deathRate;
 	
 	public Infectious(ContinuousSpace<Object> space, Grid<Object> grid) {
-		this.grid = grid;
-		this.space = space;
-
+		super(space, grid);
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		this.recoveryRate =  (Float) params.getValue("recover_rate");
+		this.deathRate =  (Float) params.getValue("death_rate");
 	}
 	
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-		GridPoint pt = grid.getLocation(this);
 		moveRandom();
 		infect();
-		recover();
-	}
-	
-	public void moveRandom() {
-		NdPoint ndPoint = space.getLocation(this);
-		space.moveByVector(this, 1, Math.random() * 2 * 3.1415f, 0);
-		ndPoint = space.getLocation(this);
-		grid.moveTo(this, (int) ndPoint.getX(), (int) ndPoint.getY());
-
+		if(!recover()) {
+			die();
+		}
 	}
 	
 	public void infect() {
@@ -58,7 +49,7 @@ public class Infectious {
 		}
 	}
 	
-	public void recover() {
+	public boolean recover() {
 		if ( RandomHelper.nextDouble() < recoveryRate) {
 			GridPoint pt = grid.getLocation(this);
 			NdPoint spacePt = space.getLocation(this);
@@ -69,7 +60,15 @@ public class Infectious {
 			context.add(recovered);
 			space.moveTo(recovered, spacePt.getX(), spacePt.getY());
 			grid.moveTo(recovered, pt.getX(), pt.getY());
-		
+			return true;
+		}
+		return false;
+	}
+	
+	public void die() {
+		if ( RandomHelper.nextDouble() < deathRate) {
+			Context<Object> context = ContextUtils.getContext(this);
+			context.remove(this);
 		}
 	}
 }
